@@ -1,0 +1,37 @@
+{
+  "name": "retailer",
+  "version": "0.0.1",
+  "description": "A simple API for retailers",
+  "main": "src/app/index.ts",
+  "scripts": {
+    "test": "jest",
+    "dev": "ts-node-dev --respawn --transpile-only src/app/index.ts"
+  },
+  "imports": {
+    "#routes/*": "./routes/*.js",
+    "#middlewares/*": "./middlewares/*.js"
+  },
+  "author": "userBarbosa",
+  "license": "MIT",
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/mongodb": "^4.0.6",
+    "@types/node": "^22.7.4",
+    "@types/oracledb": "^6.5.1",
+    "ts-jest": "^29.2.5",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.2"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "keycloak-connect": "^25.0.6",
+    "keycloak-js": "^25.0.6",
+    "mongodb": "^6.9.0",
+    "oracledb": "^6.6.0"
+  }
+}

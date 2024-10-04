@@ -1,0 +1,32 @@
+services:
+  retailers-database:
+    image: mysql:latest
+    container_name: retailers-database
+    command: --lower_case_table_names=1
+    restart: always
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # MYSQL_RANDOM_ROOT_PASSWORD: true
+    ports:
+      - "${MYSQL_DB_PORT}:${MYSQL_DB_PORT}"
+    volumes:
+      - mysql-persistence:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "$$MYSQL_USER", "--password=$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  mysql-persistence:
+
+# DATABASE_URL="postgresql://johndoe:randompassword@localhost:5432/mydb?schema=public"
+# MYSQL_USER=retailer
+# MYSQL_PASSWORD=varejista
+# MYSQL_DATABASE=retailers
+# MYSQL_ROOT_PASSWORD=raiz-forte-db
+# MYSQL_DB_PORT=3306

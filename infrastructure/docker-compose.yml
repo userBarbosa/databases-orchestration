@@ -1,0 +1,80 @@
+services:
+  oracledb:
+    image: gvenzl/oracle-free:latest
+    container_name: db-oracle-retailers
+    hostname: ${ORACLEDB_HOST}
+    restart: always
+    env_file:
+      - .env
+    environment:
+      APP_USER: ${ORACLEDB_USER}
+      APP_USER_PASSWORD: ${ORACLEDB_PASSWORD}
+      ORACLE_DATABASE: ${ORACLEDB_PDB_NAME}
+      # ORACLE_MEMORY: ${ORACLEDB_MEMORY}
+      ORACLE_CHARACTERSET: AL32UTF8
+      # ORACLE_RANDOM_PASSWORD: yes
+      ORACLE_PASSWORD: ${ORACLEDB_PASSWORD}
+    ports:
+      - "${ORACLEDB_PORT}:1521"
+    volumes:
+      - oracle-volume:/opt/oracle/oradata
+      - ./oracle-init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - retailers
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  mongodb:
+    image: mongo:latest
+    container_name: db-mongo-retailers
+    hostname: ${MONGODB_HOST}
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+    ports:
+      - "${MONGODB_PORT}:27017"
+    volumes:
+      - mongo-volume:/data/db
+    networks:
+      - retailers
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+  keycloak:
+    build:
+      context: .
+      dockerfile: keycloak.dockerfile
+    # image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak-retailers
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB: oracle
+      KC_DB_URL: jdbc:oracle:thin:@//oracledb:${ORACLEDB_PORT}/${ORACLEDB_PDB_NAME}
+      KC_DB_USERNAME: ${KEYCLOAK_DB_USER}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    ports:
+      - "${KEYCLOAK_PORT}:8080"
+    depends_on:
+      oracledb:
+        condition: service_healthy
+    command:
+      - start-dev
+    networks:
+      - retailers
+
+volumes:
+  oracle-volume:
+  mongo-volume:
+
+networks:
+  retailers:
